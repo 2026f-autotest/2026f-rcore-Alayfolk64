@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "courseId": 2073,
+  "repository": "2026f-autotest/2026f-rcore-Alayfolk64",
+  "user": "Alayfolk64",
+  "totalScore": 500,
+  "chapters": {
+    "ch3": {
+      "points": "7/7",
+      "score": 100,
+      "commit": "0e6797a62197680210b39bc0ca47300be8c80eb8"
+    }
+  },
+  "score": 100,
+  "upload": {
+    "status": "pending",
+    "runId": "34781704390",
+    "runAttempt": "1"
+  }
+}
