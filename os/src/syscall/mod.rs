@@ -21,6 +21,15 @@ const SYSCALL_GET_TIME: usize = 169;
 /// trace syscall
 const SYSCALL_TRACE: usize = 410;
 
+/// System calls supported by this chapter, in per-task counter order.
+pub(crate) const SYSCALL_IDS: [usize; 5] = [
+    SYSCALL_WRITE,
+    SYSCALL_EXIT,
+    SYSCALL_YIELD,
+    SYSCALL_GET_TIME,
+    SYSCALL_TRACE,
+];
+
 mod fs;
 mod process;
 
@@ -29,6 +38,10 @@ use process::*;
 
 /// handle syscall exception with `syscall_id` and other arguments
 pub fn syscall(syscall_id: usize, args: [usize; 3]) -> isize {
+    if let Some(index) = SYSCALL_IDS.iter().position(|id| *id == syscall_id) {
+        // Count on entry so a trace query includes its own invocation.
+        crate::task::record_current_syscall(index);
+    }
     match syscall_id {
         SYSCALL_WRITE => sys_write(args[0], args[1] as *const u8, args[2]),
         SYSCALL_EXIT => sys_exit(args[0] as i32),

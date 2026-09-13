@@ -53,6 +53,14 @@ fn get_base_i(app_id: usize) -> usize {
     APP_BASE_ADDRESS + app_id * APP_SIZE_LIMIT
 }
 
+/// Chapter 3 uses physical addresses: both the app region and its user stack are valid.
+pub(crate) fn app_contains_address(app_id: usize, address: usize) -> bool {
+    let base = get_base_i(app_id);
+    let stack_top = USER_STACK[app_id].get_sp();
+    (base..base + APP_SIZE_LIMIT).contains(&address)
+        || (stack_top - USER_STACK_SIZE..stack_top).contains(&address)
+}
+
 /// Get the total number of applications.
 pub fn get_num_app() -> usize {
     extern "C" {

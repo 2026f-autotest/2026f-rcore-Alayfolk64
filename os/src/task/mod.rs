@@ -54,6 +54,7 @@ lazy_static! {
         let mut tasks = [TaskControlBlock {
             task_cx: TaskContext::zero_init(),
             task_status: TaskStatus::UnInit,
+            syscall_counts: [0; crate::syscall::SYSCALL_IDS.len()],
         }; MAX_APP_NUM];
         for (i, task) in tasks.iter_mut().enumerate() {
             task.task_cx = TaskContext::goto_restore(init_app_cx(i));
@@ -140,6 +141,25 @@ impl TaskManager {
 /// Run the first task in task list.
 pub fn run_first_task() {
     TASK_MANAGER.run_first_task();
+}
+
+/// Record a syscall before dispatching it, without holding the borrow across a switch.
+pub(crate) fn record_current_syscall(index: usize) {
+    let mut inner = TASK_MANAGER.inner.exclusive_access();
+    let current = inner.current_task;
+    inner.tasks[current].syscall_counts[index] += 1;
+}
+
+/// Return a counter belonging only to the current task.
+pub(crate) fn current_syscall_count(index: usize) -> usize {
+    let inner = TASK_MANAGER.inner.exclusive_access();
+    inner.tasks[inner.current_task].syscall_counts[index]
+}
+
+/// Check a byte address against the current application's memory and user stack.
+pub(crate) fn current_app_contains_address(address: usize) -> bool {
+    let inner = TASK_MANAGER.inner.exclusive_access();
+    crate::loader::app_contains_address(inner.current_task, address)
 }
 
 /// Switch current `Running` task to the task we have found,
